@@ -1,4 +1,4 @@
-cpp_progress_bar
+C++ Progress Bar
 ================
 
-C++ function that implements a progress bar in console applications
+C++ function that implements a progress bar in console applications.
