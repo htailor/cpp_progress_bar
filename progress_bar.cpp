@@ -15,7 +15,7 @@
 
 ProgressBar::ProgressBar(){}
 
-ProgressBar::ProgressBar(int n_, const char* description_){
+ProgressBar::ProgressBar(unsigned int n_, const char* description_){
     
     n = n_;
     frequency_update = n_;
@@ -27,7 +27,7 @@ ProgressBar::ProgressBar(int n_, const char* description_){
 	
 }
 
-void ProgressBar::SetFrequencyUpdate(int frequency_update_){
+void ProgressBar::SetFrequencyUpdate(unsigned int frequency_update_){
 	
 	if(frequency_update_ > n){
 		frequency_update = n;	 // prevents crash if freq_updates_ > n_
@@ -77,7 +77,7 @@ void ProgressBar::ClearBarField(){
 void ProgressBar::Progressed(unsigned int idx_)
 {
     try{
-        if(idx_ > n) throw "(PROGRESS_BAR) ERROR: _idx out bounds when _idx > n. \r";
+        if(idx_ > n) throw "(PROGRESS_BAR) ERROR: _idx went out of bounds, greater than n. \r";
 
         // determines whether to update the progress bar from frequency_update
 	    if ((idx_ != n) && (idx_ % (n/frequency_update) != 0)) return;

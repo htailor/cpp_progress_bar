@@ -5,9 +5,9 @@ class ProgressBar{
 
     public:        
         ProgressBar();
-        ProgressBar(int n_, const char *description_="");
+        ProgressBar(unsigned int n_, const char *description_="");
 		
-		void SetFrequencyUpdate(int frequency_update_);
+		void SetFrequencyUpdate(unsigned int frequency_update_);
 		void SetStyle(const char* unit_bar_, const char* unit_space_);		
 		int SetLengthFromConsoleWidth();
 
@@ -17,15 +17,15 @@ class ProgressBar{
 		
     private:
 	
-		int n;
+		unsigned int n;
         const char *description;
 
-		int desc_width;
+		unsigned int desc_width;
 		
 		const char *unit_bar;
         const char *unit_space;
 		
-		int frequency_update;
+		unsigned int frequency_update;
 
 };
 

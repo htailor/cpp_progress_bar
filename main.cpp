@@ -22,7 +22,8 @@ int main(){
 	n = 10000;
 	ProgressBar *bar2 = new ProgressBar(n, "Example 2");
 	bar2->SetFrequencyUpdate(10);
-	bar2->SetStyle("\u2588","-");
+	bar2->SetStyle("|","-");
+	//bar2->SetStyle("\u2588", "-"); for linux
 	
 	std::cout << std::endl;
 	for(int i=0;i<=n;++i){
