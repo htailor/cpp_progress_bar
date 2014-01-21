@@ -1,6 +1,32 @@
 #ifndef _PROGRESS_BAR_
 #define _PROGRESS_BAR_
 
-void ProgressBar(unsigned int idx_, const unsigned int n_, unsigned int freq_updates_=100, const char *desc_ = "");
+class ProgressBar{
+
+    public:        
+        ProgressBar();
+        ProgressBar(int n_, const char *description_="");
+		
+		void SetFrequencyUpdate(int frequency_update_);
+		void SetStyle(const char* unit_bar_, const char* unit_space_);		
+		int SetLengthFromConsoleWidth();
+
+        void ClearBarField();
+		
+        void Progressed(unsigned int idx_);
+		
+    private:
+	
+		int n;
+        const char *description;
+
+		int desc_width;
+		
+		const char *unit_bar;
+        const char *unit_space;
+		
+		int frequency_update;
+
+};
 
 #endif

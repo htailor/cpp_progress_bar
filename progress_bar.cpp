@@ -4,54 +4,110 @@
 #include <sys/ioctl.h>
 #endif
 
-#include "progress_bar.hpp"
 #include <iostream>
 #include <iomanip>
+#include <cstring>
 
+#include "progress_bar.hpp"
 
-void ProgressBar(unsigned int idx_, const unsigned int n_, unsigned int freq_updates_, const char *desc_)
-{
-    if(freq_updates_ > n_){ freq_updates_ = n_; } // prevents crash if freq_updates_ > n_
+#define TOTAL_PERCENTAGE 100.0
+#define CHARACTER_WIDTH_PERCENTAGE 4
 
-	if ( (idx_ % (n_/freq_updates_) != 0) ) return;
+ProgressBar::ProgressBar(){}
 
-	static int desc_width = 1;    // character width of description field
-    static int percent_width = 4; // character width of percentage field
-
-    // get console width and according adjust the length of the progress bar
+ProgressBar::ProgressBar(int n_, const char* description_){
+    
+    n = n_;
+    frequency_update = n_;
+    description = description_;
 	
-	int bar_size = 100;	// default bar size set to 100 characters
+	unit_bar = "=";
+	unit_space = " ";
+	desc_width = std::strlen(description);	// character width of description field
 	
+}
+
+void ProgressBar::SetFrequencyUpdate(int frequency_update_){
+	
+	if(frequency_update_ > n){
+		frequency_update = n;	 // prevents crash if freq_updates_ > n_
+	}
+	else{
+		frequency_update = frequency_update_;
+	}
+}
+
+void ProgressBar::SetStyle(const char* unit_bar_, const char* unit_space_){
+	
+	unit_bar = unit_bar_;
+	unit_space = unit_space_;
+}
+
+int ProgressBar::SetLengthFromConsoleWidth(){
+
+	// get console width and according adjust the length of the progress bar
+
+	int width;
+
 	#ifdef _WINDOWS
 		CONSOLE_SCREEN_BUFFER_INFO csbi;
-		int columns;
 		GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
-		columns = csbi.srWindow.Right - csbi.srWindow.Left + 1;
-		bar_size = static_cast<int>((columns - desc_width - percent_width) / 2.);
+		width = csbi.srWindow.Right - csbi.srWindow.Left + 1;
 	#else
 		struct winsize win;
 		ioctl(0, TIOCGWINSZ, &win);
-		bar_size = static_cast<int>((win.ws_col - desc_width - percent_width) / 2.);
+        width = win.ws_col;
 	#endif
-	
-    // calculate percentage of progress
-	static double total_percentage = 100.0;
-    double progress_percent = idx_*total_percentage/n_;
-     
-    // calculate the percentage value of a unit bar 
-    double percent_per_unit_bar = total_percentage/bar_size;
 
-    // display progress bar
-	std::cout << std::setw(desc_width) << desc_ << " [";
+    width = static_cast<int>((width - desc_width - CHARACTER_WIDTH_PERCENTAGE) / 2.);
 
-    for(int bar_length=0;bar_length<=bar_size-1;++bar_length){
-        if(bar_length*percent_per_unit_bar<progress_percent){
-            std::cout << "=";
+	return width;
+}
+
+void ProgressBar::ClearBarField(){
+
+    int bar_field_length =  2*SetLengthFromConsoleWidth() + desc_width + CHARACTER_WIDTH_PERCENTAGE;
+    for(int i=0;i<bar_field_length;++i){
+        std::cout << " ";
+    }
+    std::cout << "\r" << std::flush;
+
+}
+
+void ProgressBar::Progressed(unsigned int idx_)
+{
+    try{
+        if(idx_ > n) throw "(PROGRESS_BAR) ERROR: _idx out bounds when _idx > n. \r";
+
+        // determines whether to update the progress bar from frequency_update
+	    if ((idx_ != n) && (idx_ % (n/frequency_update) != 0)) return;
+
+        // calculate the size of the progress bar
+	    int bar_size = SetLengthFromConsoleWidth();
+    
+        // calculate percentage of progress
+        double progress_percent = idx_* TOTAL_PERCENTAGE/n;
+
+        // calculate the percentage value of a unit bar 
+        double percent_per_unit_bar = TOTAL_PERCENTAGE/bar_size;
+
+        // display progress bar
+	    std::cout << " " << description << " [";
+
+        for(int bar_length=0;bar_length<=bar_size-1;++bar_length){
+            if(bar_length*percent_per_unit_bar<progress_percent){
+                std::cout << unit_bar;
+            }
+            else{
+                std::cout << unit_space;
+            }
         }
-        else{
-            std::cout << " ";
-        }
+
+        std::cout << "]" << std::setw(CHARACTER_WIDTH_PERCENTAGE) << static_cast<int>(progress_percent) << "%\r" << std::flush;
+    }
+    catch(const char* e){
+        ClearBarField();
+        std::cerr << e << std::flush;
     }
 
-    std::cout << "]" << std::setw(percent_width) << static_cast<int>(progress_percent) << "%\r" << std::flush;
 }
