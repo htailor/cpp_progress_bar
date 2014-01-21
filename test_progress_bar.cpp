@@ -4,10 +4,10 @@
 
 int main(){
         
-    int n = 20;
+    int n = 100;
     for(int i=0;i<=n;++i){
-        ProgressBar(i,n,5,"test");
-        std::this_thread::sleep_for (std::chrono::milliseconds(500));
+        ProgressBar(i,n,100);
+        std::this_thread::sleep_for (std::chrono::milliseconds(100));
     }
     return 0;
 }
