@@ -20,9 +20,9 @@ class ProgressBar{
         ProgressBar();
         ProgressBar(int n_, const char *description_);
 		
-		void SetProgressBarFrequencyUpdate(int frequency_update_);
-		void SetProgrsssBarStyle(const char* unit_bar_, const char* unit_space_);		
-		int SetProgressBarLengthFromConsoleWidth();
+		void SetFrequencyUpdate(int frequency_update_);
+		void SetStyle(const char* unit_bar_, const char* unit_space_);		
+		int SetLengthFromConsoleWidth();
 		
         void Progressed(unsigned int idx_);
 		
@@ -55,7 +55,7 @@ ProgressBar::ProgressBar(int n_, const char* description_=""){
 	
 }
 
-void ProgressBar::SetProgressBarFrequencyUpdate(int frequency_update_){
+void ProgressBar::SetFrequencyUpdate(int frequency_update_){
 	
 	if(frequency_update_ > n){
 		frequency_update = n;	 // prevents crash if freq_updates_ > n_
@@ -65,13 +65,13 @@ void ProgressBar::SetProgressBarFrequencyUpdate(int frequency_update_){
 	}
 }
 
-void ProgressBar::SetProgrsssBarStyle(const char* unit_bar_, const char* unit_space_){
+void ProgressBar::SetStyle(const char* unit_bar_, const char* unit_space_){
 	
 	unit_bar = unit_bar_;
 	unit_space = unit_space_;
 }
 
-int ProgressBar::SetProgressBarLengthFromConsoleWidth(){
+int ProgressBar::SetLengthFromConsoleWidth(){
 
 	// get console width and according adjust the length of the progress bar
 
@@ -101,7 +101,7 @@ void ProgressBar::Progressed(unsigned int idx_)
 	    if ((idx_ != n) && (idx_ % (n/frequency_update) != 0)) return;
 
         // calculate the size of the progress bar
-	    int bar_size = SetProgressBarLengthFromConsoleWidth();
+	    int bar_size = SetLengthFromConsoleWidth();
     
         // calculate percentage of progress
         double progress_percent = idx_* TOTAL_PERCENTAGE/n;
@@ -130,33 +130,51 @@ void ProgressBar::Progressed(unsigned int idx_)
 }
 
 int main(){
-
-	//int n = 100;
-    int n = 5;
 	
-	ProgressBar *bar = new ProgressBar(n, "Nucleation");
-	//bar->SetProgrsssBarStyle("\u2588","-");
+	int n;
+
+	/// Example 1 ///
+
+	n = 100;
+	ProgressBar *bar1 = new ProgressBar(n, "Example 1");
 	
-    bar->Progressed(0);
+	for(int i=0;i<=n;++i){
+		bar1->Progressed(i);
+        std::this_thread::sleep_for (std::chrono::milliseconds(10));
+    }
+
+	/// Example 2 ///
+
+	n = 10000;
+	ProgressBar *bar2 = new ProgressBar(n, "Example 2");
+	bar2->SetFrequencyUpdate(10);
+	bar2->SetStyle("\u2588","-");
+	
+	std::cout << std::endl;
+	for(int i=0;i<=n;++i){
+		bar2->Progressed(i);
+        std::this_thread::sleep_for (std::chrono::milliseconds(1));
+    }
+	
+	n = 5;
+	ProgressBar bar3(n);
+	std::cout << std::endl;
+    bar3.Progressed(0);
     std::this_thread::sleep_for (std::chrono::milliseconds(1000));
-    bar->Progressed(1);
+    bar3.Progressed(1);
     std::this_thread::sleep_for (std::chrono::milliseconds(1000));
-    bar->Progressed(2);
+    bar3.Progressed(2);
     std::this_thread::sleep_for (std::chrono::milliseconds(1000));
-    bar->Progressed(3);
+    bar3.Progressed(3);
     std::this_thread::sleep_for (std::chrono::milliseconds(1000));
-    bar->Progressed(4);
+    bar3.Progressed(4);
     std::this_thread::sleep_for (std::chrono::milliseconds(1000));
-    bar->Progressed(5);
+    bar3.Progressed(5);
 
     std::this_thread::sleep_for (std::chrono::milliseconds(1000));
-    bar->Progressed(6);
-
+    bar3.Progressed(6);
     std::this_thread::sleep_for (std::chrono::milliseconds(1000));
-    bar->Progressed(7);
-//    for(int i=0;i<=n;++i){
-//		bar->Progressed(i);
-   //     std::this_thread::sleep_for (std::chrono::milliseconds(100));
-  //  }
+    bar3.Progressed(7);
+
 	return 0;
 }
