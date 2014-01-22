@@ -66,18 +66,18 @@ int ProgressBar::SetLengthFromConsoleWidth(){
 
 void ProgressBar::ClearBarField(){
 
-    int bar_field_length =  2*SetLengthFromConsoleWidth() + desc_width + CHARACTER_WIDTH_PERCENTAGE;
+
+    int bar_field_length = SetLengthFromConsoleWidth() + desc_width + CHARACTER_WIDTH_PERCENTAGE + 5; // 5 comes from the two additional blacnk spaces, two brackets and percentage characters
     for(int i=0;i<bar_field_length;++i){
         std::cout << " ";
     }
     std::cout << "\r" << std::flush;
-
 }
 
 void ProgressBar::Progressed(unsigned int idx_)
 {
     try{
-        if(idx_ > n) throw "(PROGRESS_BAR) ERROR: _idx went out of bounds, greater than n. \r";
+        if(idx_ > n) throw idx_;
 
         // determines whether to update the progress bar from frequency_update
 	    if ((idx_ != n) && (idx_ % (n/frequency_update) != 0)) return;
@@ -105,9 +105,9 @@ void ProgressBar::Progressed(unsigned int idx_)
 
         std::cout << "]" << std::setw(CHARACTER_WIDTH_PERCENTAGE) << static_cast<int>(progress_percent) << "%\r" << std::flush;
     }
-    catch(const char* e){
+    catch(unsigned int e){
         ClearBarField();
-        std::cerr << e << std::flush;
+        std::cerr << "PROGRESS_BAR_EXCEPTION: _idx (" << e << ") went out of bounds, greater than n (" << n << ").\r" << std::flush;
     }
 
 }
