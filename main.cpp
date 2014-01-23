@@ -6,7 +6,7 @@
 int main(){
 	
 	int n;
-	/*
+	
 	/// Example 1 ///
 
 	n = 100;
@@ -30,10 +30,9 @@ int main(){
 		bar2->Progressed(i);
         std::this_thread::sleep_for(std::chrono::milliseconds(1));
     }
-	*/
+	
 	n = 5;
 	ProgressBar bar3(n);
-	//std::cout << std::endl;
     bar3.Progressed(0);
     std::this_thread::sleep_for (std::chrono::milliseconds(200));
     bar3.Progressed(1);
@@ -45,7 +44,7 @@ int main(){
     bar3.Progressed(4);
     std::this_thread::sleep_for (std::chrono::milliseconds(200));
     bar3.Progressed(5);
-
+    // following tests exception error
     std::this_thread::sleep_for (std::chrono::milliseconds(200));
     bar3.Progressed(6);
     std::this_thread::sleep_for (std::chrono::milliseconds(200));

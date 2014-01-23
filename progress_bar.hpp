@@ -9,23 +9,22 @@ class ProgressBar{
 		
 		void SetFrequencyUpdate(unsigned int frequency_update_);
 		void SetStyle(const char* unit_bar_, const char* unit_space_);		
-		int SetLengthFromConsoleWidth();
 
-        void ClearBarField();
-		
         void Progressed(unsigned int idx_);
 		
     private:
 	
 		unsigned int n;
-        const char *description;
-
 		unsigned int desc_width;
+		unsigned int frequency_update;
 		
+		const char *description;
 		const char *unit_bar;
         const char *unit_space;
 		
-		unsigned int frequency_update;
+		void ClearBarField();
+		int GetConsoleWidth();
+		int GetBarLength();
 
 };
 

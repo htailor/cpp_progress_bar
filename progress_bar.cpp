@@ -43,32 +43,35 @@ void ProgressBar::SetStyle(const char* unit_bar_, const char* unit_space_){
 	unit_space = unit_space_;
 }
 
-int ProgressBar::SetLengthFromConsoleWidth(){
+int ProgressBar::GetConsoleWidth(){
 
-	// get console width and according adjust the length of the progress bar
-
-	int width;
+    int width;
 
 	#ifdef _WINDOWS
 		CONSOLE_SCREEN_BUFFER_INFO csbi;
 		GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
-		width = csbi.srWindow.Right - csbi.srWindow.Left + 1;
+		width = csbi.srWindow.Right - csbi.srWindow.Left;
 	#else
 		struct winsize win;
 		ioctl(0, TIOCGWINSZ, &win);
         width = win.ws_col;
 	#endif
 
-    width = static_cast<int>((width - desc_width - CHARACTER_WIDTH_PERCENTAGE) / 2.);
+    return width;
+}
 
-	return width;
+int ProgressBar::GetBarLength(){
+
+	// get console width and according adjust the length of the progress bar
+
+    int bar_length = static_cast<int>((GetConsoleWidth() - desc_width - CHARACTER_WIDTH_PERCENTAGE) / 2.);
+
+	return bar_length;
 }
 
 void ProgressBar::ClearBarField(){
 
-
-    int bar_field_length = SetLengthFromConsoleWidth() + desc_width + CHARACTER_WIDTH_PERCENTAGE + 5; // 5 comes from the two additional blacnk spaces, two brackets and percentage characters
-    for(int i=0;i<bar_field_length;++i){
+    for(int i=0;i<GetConsoleWidth();++i){
         std::cout << " ";
     }
     std::cout << "\r" << std::flush;
@@ -83,7 +86,7 @@ void ProgressBar::Progressed(unsigned int idx_)
 	    if ((idx_ != n) && (idx_ % (n/frequency_update) != 0)) return;
 
         // calculate the size of the progress bar
-	    int bar_size = SetLengthFromConsoleWidth();
+	    int bar_size = GetBarLength();
     
         // calculate percentage of progress
         double progress_percent = idx_* TOTAL_PERCENTAGE/n;
