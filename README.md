@@ -82,13 +82,13 @@ If progressing through a large job list, iterating through every update will slo
 
 **Example 3:**
 ```C++
-	int n = 100000;
-	ProgressBar *bar2 = new ProgressBar(n, "Example 3");
-	bar2->SetFrequencyUpdate(10);
+int n = 100000;
+ProgressBar *bar2 = new ProgressBar(n, "Example 3");
+bar2->SetFrequencyUpdate(10);
 	
-	for(int i=0;i<=n;++i){
-		bar2->Progressed(i);
-	}
+for(int i=0;i<=n;++i){
+	bar2->Progressed(i);
+}
 ```
 
 Changing the bar style
@@ -98,14 +98,14 @@ The progress bar can be customised using the `SetStyle(const char*, const char*)
 
 **Example 4**
 ```C++
-	n = 1000;
-	ProgressBar *bar3 = new ProgressBar(n, "Example 4");
-	bar3->SetFrequencyUpdate(10);
-	bar3->SetStyle("\u2588", "-");
+n = 1000;
+ProgressBar *bar3 = new ProgressBar(n, "Example 4");
+bar3->SetFrequencyUpdate(10);
+bar3->SetStyle("\u2588", "-");
 	
-	for(int i=0;i<=n;++i){
-		bar3->Progressed(i);
-	}
+for(int i=0;i<=n;++i){
+	bar3->Progressed(i);
+}
 ```
 
 
