@@ -15,7 +15,9 @@ Implementation
 
 To use the progress bar, include the following header file:
 
-`#include "progress_bar.hpp"`
+```C++
+#include "progress_bar.hpp"
+```
 
 Creating a progress bar
 ------------------------
