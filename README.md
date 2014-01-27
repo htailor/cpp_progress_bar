@@ -41,7 +41,7 @@ ProgressBar progress_bar(n,"Example 1");
 Updating a progress bar
 -------------------------
  
-Updates to the progress bar are made using the `Progressed(int)` method using the index of the job
+Updates to the progress bar are made using the `Progressed(int)` method by passing the index of the job
  
 
 **Example 1:**
