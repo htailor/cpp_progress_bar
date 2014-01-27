@@ -66,13 +66,13 @@ progress_bar.Progressed(job_index);
 **Example 2:**
 
 ```C++
-	int n = 100;
-	ProgressBar *bar = new ProgressBar(n, "Example 1");
+int n = 100;
+ProgressBar *bar = new ProgressBar(n, "Example 1");
 	
-	for(int i=0;i<=n;++i){
-		bar1->Progressed(i);
-        	std::this_thread::sleep_for (std::chrono::milliseconds(10));
-    	}
+for(int i=0;i<=n;++i){
+	bar1->Progressed(i);
+	std::this_thread::sleep_for (std::chrono::milliseconds(10));
+}
 ```
 
 Setting the frequency of updates
