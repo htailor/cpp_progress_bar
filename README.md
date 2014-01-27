@@ -25,15 +25,15 @@ Creating a progress bar
 To create a progress bar, the total number of jobs need to be known.
 
 ```C++   
-    int n = 10;
-    ProgressBar progress_bar(n);
+int n = 10;
+ProgressBar progress_bar(n);
 ```
     
  Optionally, small descriptions can also be added to the progress bar
 
 ```C++ 
-    int n = 10;
-    ProgressBar progress_bar(n,"Example 1");
+int n = 10;
+ProgressBar progress_bar(n,"Example 1");
 ```
  
  
@@ -47,20 +47,20 @@ Updates to the progress bar are made using the `Progressed(int)` method using th
 **Example 1:**
 
 ```C++
-	int n = 10;
-	ProgressBar progress_bar(n,"Example 1");
+int n = 10;
+ProgressBar progress_bar(n,"Example 1");
     
-	int job_index = 0;
+int job_index = 0;
     
-	do_some_work();
+do_some_work();
     
-	job_index++;
-	progress_bar.Progressed(job_index);
+job_index++;
+progress_bar.Progressed(job_index);
  
-	do_some_more_work();
+do_some_more_work();
     
-    	job_index++;
-    	progress_bar.Progressed(job_index);
+job_index++;
+progress_bar.Progressed(job_index);
 ```
  
 **Example 2:**
