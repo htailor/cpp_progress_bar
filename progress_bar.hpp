@@ -5,18 +5,18 @@ class ProgressBar{
 
     public:        
         ProgressBar();
-        ProgressBar(unsigned int n_, const char *description_="");
+        ProgressBar(unsigned long n_, const char *description_="");
 		
-		void SetFrequencyUpdate(unsigned int frequency_update_);
+		void SetFrequencyUpdate(unsigned long frequency_update_);
 		void SetStyle(const char* unit_bar_, const char* unit_space_);		
 
-        void Progressed(unsigned int idx_);
+        void Progressed(unsigned long idx_);
 		
     private:
 	
-		unsigned int n;
+		unsigned long n;
 		unsigned int desc_width;
-		unsigned int frequency_update;
+		unsigned long frequency_update;
 		
 		const char *description;
 		const char *unit_bar;
