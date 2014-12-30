@@ -1,30 +1,18 @@
-#ifdef _WINDOWS
-#include <windows.h>
-#else
-#include <sys/ioctl.h>
-#endif
-
-#include <iostream>
-#include <iomanip>
-#include <cstring>
-
 #include "progress_bar.hpp"
 
-#define TOTAL_PERCENTAGE 100.0
-#define CHARACTER_WIDTH_PERCENTAGE 4
+ProgressBar::ProgressBar() {}
 
-ProgressBar::ProgressBar(){}
-
-ProgressBar::ProgressBar(unsigned long n_, const char* description_){
+ProgressBar::ProgressBar(unsigned long n_, const char* description_, std::ostream& out_){
     
     n = n_;
     frequency_update = n_;
     description = description_;
+    out = &out_;
 	
 	unit_bar = "=";
 	unit_space = " ";
 	desc_width = std::strlen(description);	// character width of description field
-	
+
 }
 
 void ProgressBar::SetFrequencyUpdate(unsigned long frequency_update_){
@@ -72,9 +60,9 @@ int ProgressBar::GetBarLength(){
 void ProgressBar::ClearBarField(){
 
     for(int i=0;i<GetConsoleWidth();++i){
-        std::cout << " ";
+        *out << " ";
     }
-    std::cout << "\r" << std::flush;
+    *out << "\r" << std::flush;
 }
 
 void ProgressBar::Progressed(unsigned long idx_)
@@ -95,18 +83,18 @@ void ProgressBar::Progressed(unsigned long idx_)
         double percent_per_unit_bar = TOTAL_PERCENTAGE/bar_size;
 
         // display progress bar
-	    std::cout << " " << description << " [";
+	    *out << " " << description << " [";
 
         for(int bar_length=0;bar_length<=bar_size-1;++bar_length){
             if(bar_length*percent_per_unit_bar<progress_percent){
-                std::cout << unit_bar;
+                *out << unit_bar;
             }
             else{
-                std::cout << unit_space;
+                *out << unit_space;
             }
         }
 
-        std::cout << "]" << std::setw(CHARACTER_WIDTH_PERCENTAGE) << static_cast<int>(progress_percent) << "%\r" << std::flush;
+        *out << "]" << std::setw(CHARACTER_WIDTH_PERCENTAGE) << static_cast<int>(progress_percent) << "%\r" << std::flush;
     }
     catch(unsigned long e){
         ClearBarField();
