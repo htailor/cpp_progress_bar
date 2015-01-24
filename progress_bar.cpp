@@ -94,7 +94,7 @@ void ProgressBar::Progressed(unsigned long idx_)
             }
         }
 
-        *out << "]" << std::setw(CHARACTER_WIDTH_PERCENTAGE) << std::setprecision(3) << progress_percent << "%\r" << std::flush;
+        *out << "]" << std::setw(CHARACTER_WIDTH_PERCENTAGE + 1) << std::setprecision(1) << std::fixed << progress_percent << "%\r" << std::flush;
     }
     catch(unsigned long e){
         ClearBarField();
