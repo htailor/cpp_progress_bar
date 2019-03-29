@@ -8,39 +8,35 @@
 #endif
 
 #include <iostream>
-#include <iomanip>
-#include <cstring>
+#include <string>
 
-#define TOTAL_PERCENTAGE 100.0
-#define CHARACTER_WIDTH_PERCENTAGE 4
 
 class ProgressBar{
+  public:
+    ProgressBar(uint64_t total,
+                const std::string &description = "",
+                std::ostream &out = std::cerr);
+    ~ProgressBar();
 
-public: 
+    void SetFrequencyUpdate(uint64_t frequency_update_);
+    void SetStyle(char unit_bar, char unit_space);
 
-    ProgressBar();
-    ProgressBar(unsigned long n_, const char *description_="", std::ostream& out_=std::cerr);
+    void Progressed(uint64_t idx_);
+    ProgressBar& operator++();
 
-    void SetFrequencyUpdate(unsigned long frequency_update_);
-    void SetStyle(const char* unit_bar_, const char* unit_space_);		
+  private:
+    uint64_t total_;
+    uint64_t progress_ = 0;
+    uint64_t frequency_update;
+    std::ostream *out;
 
-    void Progressed(unsigned long idx_);
+    std::string description_;
+    char unit_bar_ = '=';
+    char unit_space_ = ' ';
 
-private:
-	
-    unsigned long n;
-    unsigned int desc_width;
-    unsigned long frequency_update;
-    std::ostream* out;
-		
-    const char *description;
-    const char *unit_bar;
-    const char *unit_space;
-		
     void ClearBarField();
     int GetConsoleWidth();
     int GetBarLength();
-
 };
 
 #endif
