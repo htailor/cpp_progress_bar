@@ -1,8 +1,9 @@
 #include "progress_bar.hpp"
 
 #include <iomanip>
+#include <cmath>
 
-const size_t kMessageSize = 25;
+const size_t kMessageSize = 20;
 const double kTotalPercentage = 100.0;
 const size_t kCharacterWidthPercentage = 4;
 
@@ -55,7 +56,8 @@ int ProgressBar::GetConsoleWidth() {
 int ProgressBar::GetBarLength() {
     // get console width and according adjust the length of the progress bar
     return (GetConsoleWidth() - description_.size()
-                                - kCharacterWidthPercentage) / 2.;
+                                - kCharacterWidthPercentage
+                                - std::log10(total_ * 2) * 2) / 2.;
 }
 
 void ProgressBar::ClearBarField() {
@@ -80,7 +82,7 @@ void ProgressBar::Progressed(uint64_t idx_) {
         int bar_size = GetBarLength();
 
         // calculate percentage of progress
-        double progress_percent = idx_* kTotalPercentage / total_;
+        double progress_percent = idx_ * kTotalPercentage / total_;
 
         // calculate the percentage value of a unit bar
         double percent_per_unit_bar = kTotalPercentage / bar_size;
@@ -100,7 +102,8 @@ void ProgressBar::Progressed(uint64_t idx_) {
         *out << "]" << std::setw(kCharacterWidthPercentage + 1)
                     << std::setprecision(1)
                     << std::fixed
-                    << progress_percent << "%\r" << std::flush;
+                    << progress_percent << "%, "
+                    << progress_ << "/" << total_ << "\r" << std::flush;
     } catch (uint64_t e) {
         ClearBarField();
         std::cerr << "PROGRESS_BAR_EXCEPTION: _idx ("
