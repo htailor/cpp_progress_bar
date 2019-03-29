@@ -2,6 +2,7 @@
 
 #include <iomanip>
 #include <cmath>
+#include <cassert>
 
 const size_t kMessageSize = 20;
 const double kTotalPercentage = 100.0;
