@@ -23,6 +23,7 @@ class ProgressBar{
 
     void Progressed(uint64_t idx_);
     ProgressBar& operator++();
+    ProgressBar& operator+=(uint64_t delta);
 
   private:
     uint64_t total_;

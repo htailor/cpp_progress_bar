@@ -117,3 +117,8 @@ ProgressBar& ProgressBar::operator++() {
     this->Progressed(progress_ + 1);
     return *this;
 }
+
+ProgressBar& ProgressBar::operator+=(uint64_t delta) {
+    this->Progressed(progress_ + delta);
+    return *this;
+}
