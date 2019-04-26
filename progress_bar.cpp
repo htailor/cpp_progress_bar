@@ -19,6 +19,8 @@ ProgressBar::ProgressBar(uint64_t total,
 
     assert(description_.size() <= kMessageSize);
     description_.resize(kMessageSize, ' ');
+
+    Progressed(0);
 }
 
 ProgressBar::~ProgressBar() {
