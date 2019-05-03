@@ -60,7 +60,7 @@ int ProgressBar::GetBarLength() {
     // get console width and according adjust the length of the progress bar
     return (GetConsoleWidth() - description_.size()
                                 - kCharacterWidthPercentage
-                                - std::log10(total_ * 2) * 2) / 2.;
+                                - std::log10(std::max(uint64_t(1), total_) * 2) * 2) / 2.;
 }
 
 void ProgressBar::ClearBarField() {
@@ -85,7 +85,8 @@ void ProgressBar::Progressed(uint64_t idx_) {
         int bar_size = GetBarLength();
 
         // calculate percentage of progress
-        double progress_percent = idx_ * kTotalPercentage / total_;
+        double progress_percent = total_ ? idx_ * kTotalPercentage / total_
+                                         : kTotalPercentage;
 
         // calculate the percentage value of a unit bar
         double percent_per_unit_bar = kTotalPercentage / bar_size;
