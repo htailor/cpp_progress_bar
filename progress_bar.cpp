@@ -24,7 +24,7 @@ ProgressBar::ProgressBar(uint64_t total,
     assert(description_.size() <= kMessageSize);
     description_.resize(kMessageSize, ' ');
 
-    Progressed(0);
+    ShowProgress();
 }
 
 ProgressBar::~ProgressBar() {
@@ -33,6 +33,8 @@ ProgressBar::~ProgressBar() {
 }
 
 void ProgressBar::SetFrequencyUpdate(uint64_t frequency_update_) {
+    std::lock_guard<std::mutex> lock(mu_);
+
     if(frequency_update_ > total_){
         frequency_update = total_;    // prevents crash if freq_updates_ > total_
     } else{
@@ -41,6 +43,8 @@ void ProgressBar::SetFrequencyUpdate(uint64_t frequency_update_) {
 }
 
 void ProgressBar::SetStyle(char unit_bar, char unit_space) {
+    std::lock_guard<std::mutex> lock(mu_);
+
     unit_bar_ = unit_bar;
     unit_space_ = unit_space;
 }
@@ -68,7 +72,7 @@ int ProgressBar::GetBarLength() const {
                                 - std::log10(std::max(uint64_t(1), total_) * 2) * 2) / 2.;
 }
 
-void ProgressBar::ClearBarField() {
+void ProgressBar::ClearBarField() const {
     if (silent_)
         return;
 
@@ -78,25 +82,18 @@ void ProgressBar::ClearBarField() {
     *out << "\r" << std::flush;
 }
 
-void ProgressBar::Progressed(uint64_t idx_) {
+void ProgressBar::ShowProgress() const {
     if (silent_)
         return;
 
+    std::lock_guard<std::mutex> lock(mu_);
+
     try {
-        if (idx_ > total_)
-            throw idx_;
-
-        progress_ = idx_;
-
-        // determines whether to update the progress bar from frequency_update
-        if ((idx_ != total_) && (idx_ % (total_ / frequency_update) != 0))
-            return;
-
         // calculate the size of the progress bar
         int bar_size = GetBarLength();
 
         // calculate percentage of progress
-        double progress_percent = total_ ? idx_ * kTotalPercentage / total_
+        double progress_percent = total_ ? progress_ * kTotalPercentage / total_
                                          : kTotalPercentage;
 
         // calculate the percentage value of a unit bar
@@ -132,8 +129,17 @@ ProgressBar& ProgressBar::operator++() {
 }
 
 ProgressBar& ProgressBar::operator+=(uint64_t delta) {
-    if (!silent_)
-        this->Progressed(progress_ + delta);
+    if (silent_ || !delta)
+        return *this;
+
+    uint64_t after_update = (progress_ += delta);
+
+    if (after_update > total_)
+        throw after_update;
+
+    // determines whether to update the progress bar from frequency_update
+    if (after_update == total_ || after_update % (total_ / frequency_update) == 0)
+        ShowProgress();
 
     return *this;
 }
