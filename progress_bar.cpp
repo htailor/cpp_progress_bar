@@ -3,10 +3,11 @@
 #include <iomanip>
 #include <cmath>
 #include <cassert>
+#include <cstdio>
 
 const size_t kMessageSize = 20;
 const double kTotalPercentage = 100.0;
-const size_t kCharacterWidthPercentage = 4;
+const size_t kCharacterWidthPercentage = 7;
 
 
 ProgressBar::ProgressBar(uint64_t total,
@@ -73,13 +74,8 @@ int ProgressBar::GetBarLength() const {
 }
 
 void ProgressBar::ClearBarField() const {
-    if (silent_)
-        return;
-
-    for(int i = 0; i < GetConsoleWidth(); ++i) {
-        *out << " ";
-    }
-    *out << "\r" << std::flush;
+    if (!silent_)
+        *out << (std::string(GetConsoleWidth(), ' ') + '\r') << std::flush;
 }
 
 void ProgressBar::ShowProgress() const {
@@ -100,22 +96,24 @@ void ProgressBar::ShowProgress() const {
         double percent_per_unit_bar = kTotalPercentage / bar_size;
 
         // display progress bar
-        // *out << " " << (percent_per_unit_bar < 1
-        //                 ? description
-        //                 : std::string(' ', desc_width)) << " [";
-        *out << " " << description_ << " [";
+        std::string str = " " + description_ + " [";
 
         for(int bar_length = 0; bar_length <= bar_size - 1; ++bar_length) {
-            *out << (bar_length * percent_per_unit_bar < progress_percent
+            str += (bar_length * percent_per_unit_bar < progress_percent
                     ? unit_bar_
                     : unit_space_);
         }
 
-        *out << "]" << std::setw(kCharacterWidthPercentage + 1)
-                    << std::setprecision(1)
-                    << std::fixed
-                    << progress_percent << "%, "
-                    << progress_ << "/" << total_ << "\r" << std::flush;
+        str += "] " + std::string(kCharacterWidthPercentage, ' ');
+
+        snprintf(&str[str.size() - kCharacterWidthPercentage],
+                 kCharacterWidthPercentage,
+                 "%5.1f%%", progress_percent);
+
+        str += ", " + std::to_string(progress_) + "/" + std::to_string(total_) + "\r";
+
+        *out << str << std::flush;
+
     } catch (uint64_t e) {
         ClearBarField();
         std::cerr << "PROGRESS_BAR_EXCEPTION: _idx ("
@@ -134,8 +132,7 @@ ProgressBar& ProgressBar::operator+=(uint64_t delta) {
 
     uint64_t after_update = (progress_ += delta);
 
-    if (after_update > total_)
-        throw after_update;
+    assert(after_update <= total_);
 
     // determines whether to update the progress bar from frequency_update
     if (after_update == total_ || after_update % (total_ / frequency_update) == 0)
