@@ -26,6 +26,9 @@ class ProgressBar{
     ProgressBar& operator+=(uint64_t delta);
 
   private:
+    ProgressBar(const ProgressBar &) = delete;
+    ProgressBar& operator=(const ProgressBar &) = delete;
+
     uint64_t total_;
     uint64_t progress_ = 0;
     uint64_t frequency_update;
