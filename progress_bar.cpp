@@ -11,8 +11,12 @@ const size_t kCharacterWidthPercentage = 4;
 
 ProgressBar::ProgressBar(uint64_t total,
                          const std::string &description,
-                         std::ostream &out_)
-      : total_(total), description_(description) {
+                         std::ostream &out_,
+                         bool silent)
+      : silent_(silent), total_(total), description_(description) {
+    if (silent_)
+        return;
+
     frequency_update = std::min(static_cast<uint64_t>(1000), total_);
     out = &out_;
     *out << "\n";
@@ -24,7 +28,8 @@ ProgressBar::ProgressBar(uint64_t total,
 }
 
 ProgressBar::~ProgressBar() {
-    *out << "\n";
+    if (!silent_)
+        *out << "\n";
 }
 
 void ProgressBar::SetFrequencyUpdate(uint64_t frequency_update_) {
@@ -35,12 +40,12 @@ void ProgressBar::SetFrequencyUpdate(uint64_t frequency_update_) {
     }
 }
 
-void ProgressBar::SetStyle(char unit_bar, char unit_space){
+void ProgressBar::SetStyle(char unit_bar, char unit_space) {
     unit_bar_ = unit_bar;
     unit_space_ = unit_space;
 }
 
-int ProgressBar::GetConsoleWidth() {
+int ProgressBar::GetConsoleWidth() const {
     int width;
 
     #ifdef _WINDOWS
@@ -56,7 +61,7 @@ int ProgressBar::GetConsoleWidth() {
     return width;
 }
 
-int ProgressBar::GetBarLength() {
+int ProgressBar::GetBarLength() const {
     // get console width and according adjust the length of the progress bar
     return (GetConsoleWidth() - description_.size()
                                 - kCharacterWidthPercentage
@@ -64,6 +69,9 @@ int ProgressBar::GetBarLength() {
 }
 
 void ProgressBar::ClearBarField() {
+    if (silent_)
+        return;
+
     for(int i = 0; i < GetConsoleWidth(); ++i) {
         *out << " ";
     }
@@ -71,6 +79,9 @@ void ProgressBar::ClearBarField() {
 }
 
 void ProgressBar::Progressed(uint64_t idx_) {
+    if (silent_)
+        return;
+
     try {
         if (idx_ > total_)
             throw idx_;
@@ -117,11 +128,12 @@ void ProgressBar::Progressed(uint64_t idx_) {
 }
 
 ProgressBar& ProgressBar::operator++() {
-    this->Progressed(progress_ + 1);
-    return *this;
+    return (*this) += 1;
 }
 
 ProgressBar& ProgressBar::operator+=(uint64_t delta) {
-    this->Progressed(progress_ + delta);
+    if (!silent_)
+        this->Progressed(progress_ + delta);
+
     return *this;
 }

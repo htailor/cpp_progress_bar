@@ -11,11 +11,13 @@
 #include <string>
 
 
-class ProgressBar{
+class ProgressBar {
   public:
     ProgressBar(uint64_t total,
                 const std::string &description = "",
-                std::ostream &out = std::cerr);
+                std::ostream &out = std::cerr,
+                bool silent = false);
+
     ~ProgressBar();
 
     void SetFrequencyUpdate(uint64_t frequency_update_);
@@ -29,6 +31,7 @@ class ProgressBar{
     ProgressBar(const ProgressBar &) = delete;
     ProgressBar& operator=(const ProgressBar &) = delete;
 
+    bool silent_;
     uint64_t total_;
     uint64_t progress_ = 0;
     uint64_t frequency_update;
@@ -39,8 +42,8 @@ class ProgressBar{
     char unit_space_ = ' ';
 
     void ClearBarField();
-    int GetConsoleWidth();
-    int GetBarLength();
+    int GetConsoleWidth() const;
+    int GetBarLength() const;
 };
 
 #endif
