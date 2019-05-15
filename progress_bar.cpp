@@ -68,9 +68,13 @@ int ProgressBar::GetConsoleWidth() const {
 
 int ProgressBar::GetBarLength() const {
     // get console width and according adjust the length of the progress bar
-    return (GetConsoleWidth() - description_.size()
-                                - kCharacterWidthPercentage
-                                - std::log10(std::max(uint64_t(1), total_) * 2) * 2) / 2.;
+    int max_size = GetConsoleWidth()
+                    - 9
+                    - description_.size()
+                    - kCharacterWidthPercentage
+                    - std::ceil(std::log10(std::max(uint64_t(1), total_))) * 2;
+
+    return max_size / 2;
 }
 
 void ProgressBar::ClearBarField() const {
@@ -85,34 +89,35 @@ void ProgressBar::ShowProgress() const {
     std::lock_guard<std::mutex> lock(mu_);
 
     try {
+        // clear previous progressbar
+        *out << std::string(buffer_.size(), ' ') + '\r' << std::flush;
+        buffer_.clear();
+
         // calculate the size of the progress bar
         int bar_size = GetBarLength();
+        if (bar_size < 1)
+            return;
 
         // calculate percentage of progress
-        double progress_percent = total_ ? progress_ * kTotalPercentage / total_
-                                         : kTotalPercentage;
+        double progress_ratio = total_ ? static_cast<double>(progress_) / total_
+                                       : 1.0;
+        assert(progress_ratio >= 0.0);
+        assert(progress_ratio <= 1.0);
 
-        // calculate the percentage value of a unit bar
-        double percent_per_unit_bar = kTotalPercentage / bar_size;
+        // write the state of the progress bar
+        buffer_ = " " + description_
+                      + " ["
+                        + std::string(size_t(bar_size * progress_ratio), unit_bar_)
+                        + std::string(bar_size - size_t(bar_size * progress_ratio), unit_space_)
+                      + "] " + std::string(kCharacterWidthPercentage, ' ');
 
-        // display progress bar
-        std::string str = " " + description_ + " [";
-
-        for(int bar_length = 0; bar_length <= bar_size - 1; ++bar_length) {
-            str += (bar_length * percent_per_unit_bar < progress_percent
-                    ? unit_bar_
-                    : unit_space_);
-        }
-
-        str += "] " + std::string(kCharacterWidthPercentage, ' ');
-
-        snprintf(&str[str.size() - kCharacterWidthPercentage],
+        snprintf(&buffer_[buffer_.size() - kCharacterWidthPercentage],
                  kCharacterWidthPercentage,
-                 "%5.1f%%", progress_percent);
+                 "%5.1f%%", progress_ratio * kTotalPercentage);
 
-        str += ", " + std::to_string(progress_) + "/" + std::to_string(total_) + "\r";
+        buffer_ += ", " + std::to_string(progress_) + "/" + std::to_string(total_) + '\r';
 
-        *out << str << std::flush;
+        *out << buffer_ << std::flush;
 
     } catch (uint64_t e) {
         ClearBarField();

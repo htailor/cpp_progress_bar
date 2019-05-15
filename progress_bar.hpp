@@ -43,6 +43,7 @@ class ProgressBar {
     uint64_t frequency_update;
     std::ostream *out;
     mutable std::mutex mu_;
+    mutable std::string buffer_;
 
     std::string description_;
     char unit_bar_ = '=';
