@@ -20,7 +20,6 @@ ProgressBar::ProgressBar(uint64_t total,
 
     frequency_update = std::min(static_cast<uint64_t>(1000), total_);
     out = &out_;
-    *out << "\n";
 
     assert(description_.size() <= kMessageSize);
     description_.resize(kMessageSize, ' ');
