@@ -139,7 +139,9 @@ ProgressBar& ProgressBar::operator+=(uint64_t delta) {
     assert(after_update <= total_);
 
     // determines whether to update the progress bar from frequency_update
-    if (after_update == total_ || after_update % (total_ / frequency_update) == 0)
+    if (after_update == total_
+            || (after_update - delta) / frequency_update
+                        < after_update / frequency_update)
         ShowProgress();
 
     return *this;
