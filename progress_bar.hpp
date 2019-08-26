@@ -33,7 +33,6 @@ class ProgressBar {
     ProgressBar& operator=(const ProgressBar &) = delete;
 
     void ShowProgress() const;
-    void ClearBarField() const;
     int GetConsoleWidth() const;
     int GetBarLength() const;
 

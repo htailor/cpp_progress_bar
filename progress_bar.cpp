@@ -8,6 +8,8 @@
 const size_t kMessageSize = 20;
 const double kTotalPercentage = 100.0;
 const size_t kCharacterWidthPercentage = 7;
+const int kDefaultConsoleWidth = 100;
+const int kMaxBarWidth = 100;
 
 
 ProgressBar::ProgressBar(uint64_t total,
@@ -50,7 +52,7 @@ void ProgressBar::SetStyle(char unit_bar, char unit_space) {
 }
 
 int ProgressBar::GetConsoleWidth() const {
-    int width;
+    int width = kDefaultConsoleWidth;
 
     #ifdef _WINDOWS
         CONSOLE_SCREEN_BUFFER_INFO csbi;
@@ -58,8 +60,8 @@ int ProgressBar::GetConsoleWidth() const {
         width = csbi.srWindow.Right - csbi.srWindow.Left;
     #else
         struct winsize win;
-        ioctl(0, TIOCGWINSZ, &win);
-        width = win.ws_col;
+        if (ioctl(0, TIOCGWINSZ, &win) != -1)
+            width = win.ws_col;
     #endif
 
     return width;
@@ -73,12 +75,7 @@ int ProgressBar::GetBarLength() const {
                     - kCharacterWidthPercentage
                     - std::ceil(std::log10(std::max(uint64_t(1), total_))) * 2;
 
-    return max_size / 2;
-}
-
-void ProgressBar::ClearBarField() const {
-    if (!silent_)
-        *out << (std::string(GetConsoleWidth(), ' ') + '\r') << std::flush;
+    return std::min(max_size / 2, kMaxBarWidth);
 }
 
 void ProgressBar::ShowProgress() const {
@@ -119,7 +116,6 @@ void ProgressBar::ShowProgress() const {
         *out << buffer_ << std::flush;
 
     } catch (uint64_t e) {
-        ClearBarField();
         std::cerr << "PROGRESS_BAR_EXCEPTION: _idx ("
                   << e << ") went out of bounds, greater than total_ ("
                   << total_ << ")." << std::endl << std::flush;
