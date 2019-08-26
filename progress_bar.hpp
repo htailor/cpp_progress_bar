@@ -37,6 +37,7 @@ class ProgressBar {
     int GetBarLength() const;
 
     bool silent_;
+    bool logging_mode_;
     uint64_t total_;
     std::atomic<uint64_t> progress_ = 0;
     uint64_t frequency_update;

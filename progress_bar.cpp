@@ -5,6 +5,15 @@
 #include <cassert>
 #include <cstdio>
 
+#if !defined(_WIN32) && (defined(__unix__) || defined(__unix) || (defined(__APPLE__) && defined(__MACH__)))
+    #include <unistd.h>
+    #if !defined(_POSIX_VERSION)
+        #include <io.h>
+    #endif
+#else
+    #include <io.h>
+#endif
+
 const size_t kMessageSize = 20;
 const double kTotalPercentage = 100.0;
 const size_t kCharacterWidthPercentage = 7;
@@ -12,16 +21,35 @@ const int kDefaultConsoleWidth = 100;
 const int kMaxBarWidth = 100;
 
 
+bool to_terminal(const std::ostream &os) {
+#if _WINDOWS
+    if (os.rdbuf() == std::cout.rdbuf() && !_isatty(_fileno(stdout)))
+        return false;
+    if (os.rdbuf() == std::cerr.rdbuf() && !_isatty(_fileno(stderr)))
+        return false;
+#else
+    if (os.rdbuf() == std::cout.rdbuf() && !isatty(fileno(stdout)))
+        return false;
+    if (os.rdbuf() == std::cerr.rdbuf() && !isatty(fileno(stderr)))
+        return false;
+#endif
+    return true;
+}
+
 ProgressBar::ProgressBar(uint64_t total,
                          const std::string &description,
                          std::ostream &out_,
                          bool silent)
       : silent_(silent), total_(total), description_(description) {
+
     if (silent_)
         return;
 
     frequency_update = std::min(static_cast<uint64_t>(1000), total_);
     out = &out_;
+
+    if ((logging_mode_ = !to_terminal(*out)))
+        *out << description_ + '\n' << std::flush;
 
     assert(description_.size() <= kMessageSize);
     description_.resize(kMessageSize, ' ');
@@ -54,15 +82,15 @@ void ProgressBar::SetStyle(char unit_bar, char unit_space) {
 int ProgressBar::GetConsoleWidth() const {
     int width = kDefaultConsoleWidth;
 
-    #ifdef _WINDOWS
+#ifdef _WINDOWS
         CONSOLE_SCREEN_BUFFER_INFO csbi;
         GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
         width = csbi.srWindow.Right - csbi.srWindow.Left;
-    #else
+#else
         struct winsize win;
         if (ioctl(0, TIOCGWINSZ, &win) != -1)
             width = win.ws_col;
-    #endif
+#endif
 
     return width;
 }
@@ -78,11 +106,36 @@ int ProgressBar::GetBarLength() const {
     return std::min(max_size / 2, kMaxBarWidth);
 }
 
+std::string get_progress_summary(double progress_ratio) {
+    std::string buffer = std::string(kCharacterWidthPercentage, ' ');
+
+    // in some implementations, snprintf always appends null terminal character
+    snprintf(buffer.data(), kCharacterWidthPercentage,
+             "%5.1f%%", progress_ratio * kTotalPercentage);
+
+    // erase the last null terminal character
+    buffer.pop_back();
+    return buffer;
+}
+
 void ProgressBar::ShowProgress() const {
     if (silent_)
         return;
 
     std::lock_guard<std::mutex> lock(mu_);
+
+    // calculate percentage of progress
+    double progress_ratio = total_ ? static_cast<double>(progress_) / total_
+                                   : 1.0;
+    assert(progress_ratio >= 0.0);
+    assert(progress_ratio <= 1.0);
+
+    if (logging_mode_) {
+        *out << get_progress_summary(progress_ratio)
+                    + ", " + std::to_string(progress_) + "/" + std::to_string(total_) + '\n';
+        out->flush();
+        return;
+    }
 
     try {
         // clear previous progressbar
@@ -94,24 +147,13 @@ void ProgressBar::ShowProgress() const {
         if (bar_size < 1)
             return;
 
-        // calculate percentage of progress
-        double progress_ratio = total_ ? static_cast<double>(progress_) / total_
-                                       : 1.0;
-        assert(progress_ratio >= 0.0);
-        assert(progress_ratio <= 1.0);
-
         // write the state of the progress bar
         buffer_ = " " + description_
                       + " ["
                         + std::string(size_t(bar_size * progress_ratio), unit_bar_)
                         + std::string(bar_size - size_t(bar_size * progress_ratio), unit_space_)
-                      + "] " + std::string(kCharacterWidthPercentage, ' ');
-
-        snprintf(&buffer_[buffer_.size() - kCharacterWidthPercentage],
-                 kCharacterWidthPercentage,
-                 "%5.1f%%", progress_ratio * kTotalPercentage);
-
-        buffer_ += ", " + std::to_string(progress_) + "/" + std::to_string(total_) + '\r';
+                      + "] " + get_progress_summary(progress_ratio)
+                      + ", " + std::to_string(progress_) + "/" + std::to_string(total_) + '\r';
 
         *out << buffer_ << std::flush;
 
