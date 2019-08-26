@@ -45,7 +45,7 @@ ProgressBar::ProgressBar(uint64_t total,
     if (silent_)
         return;
 
-    frequency_update = std::min(static_cast<uint64_t>(1000), total_);
+    frequency_update = std::max(static_cast<uint64_t>(1), total_ / 1000);
     out = &out_;
 
     if ((logging_mode_ = !to_terminal(*out)))
