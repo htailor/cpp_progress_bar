@@ -4,6 +4,9 @@
 #include <cmath>
 #include <cassert>
 #include <cstdio>
+#include <chrono>
+#include <ctime>
+#include <sstream>
 
 #if !defined(_WIN32) && (defined(__unix__) || defined(__unix) || (defined(__APPLE__) && defined(__MACH__)))
     #include <unistd.h>
@@ -131,9 +134,17 @@ void ProgressBar::ShowProgress() const {
     assert(progress_ratio <= 1.0);
 
     if (logging_mode_) {
-        *out << get_progress_summary(progress_ratio)
-                    + ", " + std::to_string(progress_) + "/" + std::to_string(total_) + '\n';
-        out->flush();
+        // get current time
+        auto now = std::chrono::system_clock::now();
+        std::time_t time = std::chrono::system_clock::to_time_t(now);
+        auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(
+                                    now.time_since_epoch()) % 1000;
+        std::stringstream os;
+        os << std::put_time(std::localtime(&time), "[%F %T.")
+           << std::setfill('0') << std::setw(3) << ms.count() << "]\t"
+           << get_progress_summary(progress_ratio)
+           << ", " + std::to_string(progress_) + "/" + std::to_string(total_) + '\n';
+        *out << os.str() << std::flush;
         return;
     }
 
