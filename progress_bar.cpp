@@ -52,9 +52,8 @@ ProgressBar::ProgressBar(uint64_t total,
     out = &out_;
 
     if ((logging_mode_ = !to_terminal(*out)))
-        *out << description_ + '\n' << std::flush;
+        *out << description_ << std::endl;
 
-    assert(description_.size() <= kMessageSize);
     description_.resize(kMessageSize, ' ');
 
     ShowProgress();
@@ -104,7 +103,7 @@ int ProgressBar::GetBarLength() const {
                     - 9
                     - description_.size()
                     - kCharacterWidthPercentage
-                    - std::ceil(std::log10(std::max(uint64_t(1), total_))) * 2;
+                    - std::ceil(std::log10(std::max(uint64_t(2), total_))) * 4;
 
     return std::min(max_size / 2, kMaxBarWidth);
 }
