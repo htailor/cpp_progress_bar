@@ -56,10 +56,11 @@ ProgressBar::ProgressBar(uint64_t total,
 
     description_.resize(kMessageSize, ' ');
 
-    ShowProgress();
+    ShowProgress(0);
 }
 
 ProgressBar::~ProgressBar() {
+    ShowProgress(progress_);
     if (!silent_)
         *out << "\n";
 }
@@ -120,14 +121,14 @@ std::string get_progress_summary(double progress_ratio) {
     return buffer;
 }
 
-void ProgressBar::ShowProgress() const {
+void ProgressBar::ShowProgress(uint64_t progress) const {
     if (silent_)
         return;
 
     std::lock_guard<std::mutex> lock(mu_);
 
     // calculate percentage of progress
-    double progress_ratio = total_ ? static_cast<double>(progress_) / total_
+    double progress_ratio = total_ ? static_cast<double>(progress) / total_
                                    : 1.0;
     assert(progress_ratio >= 0.0);
     assert(progress_ratio <= 1.0);
@@ -142,7 +143,7 @@ void ProgressBar::ShowProgress() const {
         os << std::put_time(std::localtime(&time), "[%F %T.")
            << std::setfill('0') << std::setw(3) << ms.count() << "]\t"
            << get_progress_summary(progress_ratio)
-           << ", " + std::to_string(progress_) + "/" + std::to_string(total_) + '\n';
+           << ", " + std::to_string(progress) + "/" + std::to_string(total_) + '\n';
         *out << os.str() << std::flush;
         return;
     }
@@ -163,7 +164,7 @@ void ProgressBar::ShowProgress() const {
                         + std::string(size_t(bar_size * progress_ratio), unit_bar_)
                         + std::string(bar_size - size_t(bar_size * progress_ratio), unit_space_)
                       + "] " + get_progress_summary(progress_ratio)
-                      + ", " + std::to_string(progress_) + "/" + std::to_string(total_) + '\r';
+                      + ", " + std::to_string(progress) + "/" + std::to_string(total_) + '\r';
 
         *out << buffer_ << std::flush;
 
@@ -182,7 +183,8 @@ ProgressBar& ProgressBar::operator+=(uint64_t delta) {
     if (silent_ || !delta)
         return *this;
 
-    uint64_t after_update = (progress_ += delta);
+    uint64_t after_update
+        = progress_.fetch_add(delta, std::memory_order_relaxed) + delta;
 
     assert(after_update <= total_);
 
@@ -190,7 +192,7 @@ ProgressBar& ProgressBar::operator+=(uint64_t delta) {
     if (after_update == total_
             || (after_update - delta) / frequency_update
                         < after_update / frequency_update)
-        ShowProgress();
+        ShowProgress(after_update);
 
     return *this;
 }
