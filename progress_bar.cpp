@@ -60,9 +60,12 @@ ProgressBar::ProgressBar(uint64_t total,
 }
 
 ProgressBar::~ProgressBar() {
-    ShowProgress(progress_);
-    if (!silent_)
-        *out << "\n";
+    if (progress_ != total_) {
+        // this is not supposed to happen, but may be useful for debugging
+        ShowProgress(progress_);
+        if (!silent_)
+            *out << "\n";
+    }
 }
 
 void ProgressBar::SetFrequencyUpdate(uint64_t frequency_update_) {
@@ -189,10 +192,12 @@ ProgressBar& ProgressBar::operator+=(uint64_t delta) {
     assert(after_update <= total_);
 
     // determines whether to update the progress bar from frequency_update
-    if (after_update == total_
-            || (after_update - delta) / frequency_update
-                        < after_update / frequency_update)
+    if (after_update == total_ || delta >= frequency_update) {
         ShowProgress(after_update);
+    }
+
+    if (after_update == total_)
+        *out << std::endl;
 
     return *this;
 }
