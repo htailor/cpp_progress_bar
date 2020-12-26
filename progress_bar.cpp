@@ -116,7 +116,7 @@ std::string get_progress_summary(double progress_ratio) {
     std::string buffer = std::string(kCharacterWidthPercentage, ' ');
 
     // in some implementations, snprintf always appends null terminal character
-    snprintf(buffer.data(), kCharacterWidthPercentage,
+    snprintf((char *)buffer.data(), kCharacterWidthPercentage,
              "%5.1f%%", progress_ratio * kTotalPercentage);
 
     // erase the last null terminal character
