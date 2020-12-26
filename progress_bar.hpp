@@ -39,7 +39,7 @@ class ProgressBar {
     bool silent_;
     bool logging_mode_;
     uint64_t total_;
-    std::atomic<uint64_t> progress_ = 0;
+    std::atomic<uint64_t> progress_ = {0};
     uint64_t frequency_update;
     std::ostream *out;
     mutable std::mutex mu_;
