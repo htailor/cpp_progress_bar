@@ -21,7 +21,7 @@ const size_t kMessageSize = 20;
 const double kTotalPercentage = 100.0;
 const size_t kCharacterWidthPercentage = 7;
 const int kDefaultConsoleWidth = 100;
-const int kMaxBarWidth = 100;
+const int kMaxBarWidth = 120;
 
 
 bool to_terminal(const std::ostream &os) {
@@ -103,13 +103,11 @@ int ProgressBar::GetConsoleWidth() const {
 
 int ProgressBar::GetBarLength() const {
     // get console width and according adjust the length of the progress bar
-    int max_size = GetConsoleWidth()
+    return std::min(GetConsoleWidth(), kMaxBarWidth)
                     - 9
                     - description_.size()
                     - kCharacterWidthPercentage
-                    - std::ceil(std::log10(std::max(uint64_t(2), total_))) * 4;
-
-    return std::min(max_size / 2, kMaxBarWidth);
+                    - std::floor(std::log10(std::max((uint64_t)2, total_)) + 1) * 2;
 }
 
 std::string get_progress_summary(double progress_ratio) {

@@ -3,13 +3,10 @@
 #include <thread>
 #include <chrono>
 
-int main(){
-	
-	int n;
-	
+int main() {
 	/// Example 1 ///
 	{
-		n = 100;
+		int n = 100;
 		ProgressBar bar1(n, "Example 1");
 
 		for (int i = 1; i <= n; ++i) {
@@ -20,7 +17,7 @@ int main(){
 
 	/// Example 2 ///
 	{
-		n = 1000;
+		int n = 1000;
 		ProgressBar bar2(n, "Example 2");
 		bar2.SetFrequencyUpdate(10);
 		bar2.SetStyle('|','-');
