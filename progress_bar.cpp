@@ -57,6 +57,8 @@ ProgressBar::ProgressBar(uint64_t total,
     description_.resize(kMessageSize, ' ');
 
     ShowProgress(0);
+    if (progress_ == total_)
+        *out << std::endl;
 }
 
 ProgressBar::~ProgressBar() {
