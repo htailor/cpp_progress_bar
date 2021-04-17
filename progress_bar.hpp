@@ -8,39 +8,46 @@
 #endif
 
 #include <iostream>
-#include <iomanip>
-#include <cstring>
+#include <string>
+#include <mutex>
+#include <atomic>
 
-#define TOTAL_PERCENTAGE 100.0
-#define CHARACTER_WIDTH_PERCENTAGE 4
 
-class ProgressBar{
+class ProgressBar {
+  public:
+    ProgressBar(uint64_t total,
+                const std::string &description = "",
+                std::ostream &out = std::cerr,
+                bool silent = false);
 
-public: 
+    ~ProgressBar();
 
-    ProgressBar();
-    ProgressBar(unsigned long n_, const char *description_="", std::ostream& out_=std::cerr);
+    void SetFrequencyUpdate(uint64_t frequency_update_);
+    void SetStyle(char unit_bar, char unit_space);
 
-    void SetFrequencyUpdate(unsigned long frequency_update_);
-    void SetStyle(const char* unit_bar_, const char* unit_space_);		
+    ProgressBar& operator++();
+    ProgressBar& operator+=(uint64_t delta);
 
-    void Progressed(unsigned long idx_);
+  private:
+    ProgressBar(const ProgressBar &) = delete;
+    ProgressBar& operator=(const ProgressBar &) = delete;
 
-private:
-	
-    unsigned long n;
-    unsigned int desc_width;
-    unsigned long frequency_update;
-    std::ostream* out;
-		
-    const char *description;
-    const char *unit_bar;
-    const char *unit_space;
-		
-    void ClearBarField();
-    int GetConsoleWidth();
-    int GetBarLength();
+    void ShowProgress(uint64_t progress) const;
+    int GetConsoleWidth() const;
+    int GetBarLength() const;
 
+    bool silent_;
+    bool logging_mode_;
+    uint64_t total_;
+    std::atomic<uint64_t> progress_ = {0};
+    uint64_t frequency_update;
+    std::ostream *out;
+    mutable std::mutex mu_;
+    mutable std::string buffer_;
+
+    std::string description_;
+    char unit_bar_ = '=';
+    char unit_space_ = ' ';
 };
 
-#endif
+#endif // _PROGRESS_BAR_

@@ -28,50 +28,49 @@ To create a progress bar, the total number of jobs need to be known.
 int n = 10;
 ProgressBar progress_bar(n);
 ```
-    
- Optionally, small descriptions can also be added to the progress bar
+
+Optionally, small descriptions can also be added to the progress bar.
 
 ```C++ 
 int n = 10;
-ProgressBar progress_bar(n,"Example 1");
+ProgressBar progress_bar(n, "Example 1");
 ```
- 
- 
- 
+
+
 Updating a progress bar
 -------------------------
- 
-Updates to the progress bar are made using the `Progressed(int)` method by passing the index of the job
- 
+
+Updates to the progress bar are made using the increment operators.
+
 
 **Example 1:**
 
 ```C++
 int n = 10;
-ProgressBar progress_bar(n,"Example 1");
-    
+ProgressBar progress_bar(n, "Example 1");
+
 int job_index = 0;
-    
+
 do_some_work();
-    
+
 job_index++;
-progress_bar.Progressed(job_index);
- 
+progress_bar += 1;
+
 do_some_more_work();
-    
+
 job_index++;
-progress_bar.Progressed(job_index);
+progress_bar += 1;
 ```
- 
+
 **Example 2:**
 
 ```C++
 int n = 100;
-ProgressBar *bar = new ProgressBar(n, "Example 1");
-	
-for(int i=0;i<=n;++i){
-	bar1->Progressed(i);
-	std::this_thread::sleep_for (std::chrono::milliseconds(10));
+ProgressBar bar1(n, "Example 1");
+
+for (int i = 0; i <= n; ++i) {
+    ++bar1;
+    std::this_thread::sleep_for(std::chrono::milliseconds(10));
 }
 ```
 
@@ -83,11 +82,11 @@ If progressing through a large job list, iterating through every update will slo
 **Example 3:**
 ```C++
 int n = 100000;
-ProgressBar *bar2 = new ProgressBar(n, "Example 3");
-bar2->SetFrequencyUpdate(10);
-	
-for(int i=0;i<=n;++i){
-	bar2->Progressed(i);
+ProgressBar bar2(n, "Example 3");
+bar2.SetFrequencyUpdate(10);
+
+for (int i = 0; i <= n; ++i){
+    ++bar2;
 }
 ```
 
@@ -99,12 +98,12 @@ The progress bar can be customised using the `SetStyle(const char*, const char*)
 **Example 4**
 ```C++
 n = 1000;
-ProgressBar *bar3 = new ProgressBar(n, "Example 4");
-bar3->SetFrequencyUpdate(10);
-bar3->SetStyle("\u2588", "-");
-	
-for(int i=0;i<=n;++i){
-	bar3->Progressed(i);
+ProgressBar bar3(n, "Example 4");
+bar3.SetFrequencyUpdate(10);
+bar3.SetStyle("\u2588", "-");
+
+for (int i = 0; i <= n; ++i) {
+    ++bar3;
 }
 ```
 
@@ -112,66 +111,61 @@ for(int i=0;i<=n;++i){
 Main Example
 =========
 
-
 ```C++
-#include "progress_bar.hpp"
 #include <iostream>
 #include <thread>
 #include <chrono>
 
-int main(){
-	
-	int n;
-	
-	/// Example 1 ///
+#include "progress_bar.hpp"
 
-	n = 100;
-	ProgressBar *bar1 = new ProgressBar(n, "Example 1");
-	
-	for(int i=0;i<=n;++i){
-		bar1->Progressed(i);
-        std::this_thread::sleep_for (std::chrono::milliseconds(10));
+
+int main() {
+
+    int n;
+
+    /// Example 1 ///
+
+    n = 100;
+    ProgressBar bar1(n, "Example 1");
+
+    for (int i = 0; i <= n; ++i) {
+        ++bar1;
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
     }
 
-	/// Example 2 ///
+    /// Example 2 ///
 
-	n = 1000;
-	ProgressBar *bar2 = new ProgressBar(n, "Example 2");
-	bar2->SetFrequencyUpdate(10);
-	bar2->SetStyle("|","-");
-	//bar2->SetStyle("\u2588", "-"); for linux
-	
-	std::cout << std::endl;
-	for(int i=0;i<=n;++i){
-		bar2->Progressed(i);
-       	std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    n = 1000;
+    ProgressBar bar2(n, "Example 2");
+    bar2.SetFrequencyUpdate(10);
+    bar2.SetStyle("|", "-");
+    //bar2.SetStyle("\u2588", "-"); for linux
+
+    std::cout << std::endl;
+    for (int i = 0; i <= n; ++i) {
+        ++bar2;
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
     }
-	
-	n = 5;
-	ProgressBar bar3(n);
-    bar3.Progressed(0);
-    std::this_thread::sleep_for (std::chrono::milliseconds(200));
-    bar3.Progressed(1);
-    std::this_thread::sleep_for (std::chrono::milliseconds(200));
-    bar3.Progressed(2);
-    std::this_thread::sleep_for (std::chrono::milliseconds(200));
-    bar3.Progressed(3);
-    std::this_thread::sleep_for (std::chrono::milliseconds(200));
-    bar3.Progressed(4);
-    std::this_thread::sleep_for (std::chrono::milliseconds(200));
-    bar3.Progressed(5);
+
+    n = 5;
+    ProgressBar bar3(n);
+    ++bar3;
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+    ++bar3;
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+    ++bar3;
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+    ++bar3;
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+    ++bar3;
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+    ++bar3;
     // following tests exception error
-    std::this_thread::sleep_for (std::chrono::milliseconds(200));
-    bar3.Progressed(6);
-    std::this_thread::sleep_for (std::chrono::milliseconds(200));
-    bar3.Progressed(7);
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+    ++bar3;
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+    ++bar3;
 
-	return 0;
+    return 0;
 }
 ```
-
-
-
-
-
-
